@@ -82,7 +82,7 @@
               </div> 
               <div id="date1">
                 <br>
-                <input id="datepicker1" value="Choose a Date" title="datepicker" style="width: 100%"/> 
+                <input id="datepicker1" value="Choose a date" title="datepicker" style="width: 100%"/> 
               </div>   
               <div id="piechart"></div>
               <div id="chart_div"></div>
@@ -130,25 +130,8 @@
                         $type = $(this).text();
                     });
 
-                    $("#func").click(function(e){
+                    $("#func").click(function(){
                         var date, start,end, type;
-                        e.preventDefault();
-                        if ($timesp == "Weekly") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart1);
-                        } else if ($timesp == "Monthly") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart2);
-                        } else if ($timesp == "Daily") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart4);
-                        } else if ($timesp == "Till Date") {
-                            $("#date1").hide();
-                            plot();
-                        }
                         date1 = document.getElementById('datepicker').value;
                         start = document.getElementById('start').value;
                         end = document.getElementById('end').value;
@@ -215,6 +198,31 @@
                                 $.ajax(settings).done(function (response) {
                                     console.log(response);
                                     plot();
+                                    if ($timesp == "Weekly") {
+                                        document.getElementById("datepicker1").value = "Choose a date";
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart1);
+                                    } else if ($timesp == "Monthly") {
+                                        document.getElementById("datepicker1").value = "Choose a date";
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart2);
+                                    } else if ($timesp == "Daily") {
+                                        document.getElementById("datepicker1").value = "Choose a date";
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart4);
+                                    } else if ($timesp == "Till Date") {
+                                        document.getElementById("datepicker1").value = "Choose a date";
+                                        $("#date1").hide();
+                                        plot();
+                                    } else if ($timesp == "Custom Date") {
+                                        if (document.getElementById("datepicker1").value == date1) {
+                                            google.charts.load('current', {'packages':['corechart']});
+                                            google.charts.setOnLoadCallback(drawChart3);
+                                        }                       
+                                    }
                                     bar();
                                 });
                             });
@@ -404,6 +412,7 @@
 
         $("#datepicker").attr("readonly", true);
         $("#monthpicker").attr("readonly", true);
+        $("#datepicker1").attr("readonly", true);
 
         function diff(start, end) {
             start = start.split(":");
@@ -444,21 +453,26 @@
             } else if($(this).text() == "Daily" || $(this).text() == "Weekly" || $(this).text() == "Monthly" || $(this).text() == "Till Date" || $(this).text() == "Custom Date") {
                 $timesp = $(this).text();
                 if ($timesp == "Weekly") {
+                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart1);
                 } else if ($timesp == "Monthly") {
+                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart2);
                 } else if ($timesp == "Daily") {
+                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart4);
                 } else if ($timesp == "Till Date") {
+                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     plot();
                 } else if ($timesp == "Custom Date") {
+                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").show();
                     $("#date1").change(function(){
                         google.charts.load('current', {'packages':['corechart']});
@@ -468,7 +482,7 @@
             }
         });
 
-        function plot () {
+        function plot() {
             google.charts.load('current', {'packages':['corechart']});
             google.charts.setOnLoadCallback(drawChart);
 
@@ -789,16 +803,10 @@
                     };
                     data.addRows(Object.keys(resp).length-2);
                     for (i = 0, len = arr.length; i < len; i++) {
-                        //console.log(arr[i]);
                         for (j = 0, len1 = Object.keys(resp).length-2; j < len1; j++) { 
                             if(arr[i] == resp[j]["category_name"]) {
-                                console.log(resp[j]["start_time"]);
-                                console.log(resp[j]["elapsed_time"])
                                 data.setValue(j, 0, tConvert(resp[j]["start_time"]).toString());
                                 data.setValue(j, i+1, resp[j]["elapsed_time"]);
-                                console.log("Yes,"+arr[i]+resp[j]["category_name"]+j);
-                            } else {
-                                console.log("No",+arr[i]+resp[j]["category_name"]+j);
                             }
                         }
                     };
