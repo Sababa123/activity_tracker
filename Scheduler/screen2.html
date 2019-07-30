@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Actvity Page</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/css/bootstrap-colorpicker.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/js/bootstrap-colorpicker.js"></script>
+        <script type="text/javascript" src="http://chir.ag/projects/ntc/ntc.js"></script>
+        <script src="JS_files/jscolor.js"></script>
+    </head>
+    <body>
+
+        <div class="jumbotron text-center">
+          <h1 style="font-size: 45px">Scheduler App</h1>
+          <p>Keeping track of activities</p> 
+        </div>
+          
+        <div class="container">
+          <div class="row">
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <div id = "one">
+                            <table class="table table-hover" id="paper-table"><thead><tr><td><b>Activity Name</b></td><td><b>Colour</b></td><td><b>Activity Group</b></td><td></td></tr></thead>
+                                <br>
+                                <tbody  id="tb">
+
+                                </tbody>
+                            <tfoot><tr><span id="table-title"></span></tr></tfoot></table>   
+                            <br>
+                            <table class="table table-hover" id="paper-table1"><thead><tr><td><b>Activity Name</b></td><td><b>Colour</b></td><td><b>Activity Group</b></td><td></td></tr></thead>
+                                <br>
+                                <tbody>
+                                    <a>
+                                        <tr>
+                                            <td><input id="username" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name">
+                                            </td>
+                                            <td><input id="c" class="jscolor {onFineChange:'update(this)'}" value="" placeholder="Select Colour"></td>
+                                            <td><input id="username2" value="" class="form-control input-group-lg" type="number" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group">
+                                            </td>
+                                            <td><button onclick="addThis(this)" type="button" class="btn btn-success">Add Activity Type</button></td>
+                                        </tr>
+                                    </a>
+                                </tbody>
+                            <tfoot><tr><span id="table-title1"></span></tr></tfoot></table>  
+                            <div class="text-right">
+                                <a href="screen1.html" class="btn btn-link" role="button">Go to activity page...</a>
+                            </div>
+                        </div>
+                        <div id="two">
+                            <table class="table table-hover" id="paper-table2"><thead><tr><td><b>Activity Name</b></td><td><b>Colour</b></td><td><b>Activity Group</b></td><td></td></tr></thead>
+                                <br>
+                                <tbody>
+                                    <a>
+                                        <tr>
+                                            <td><input id="username3" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name">
+                                            </td>
+                                            <td><input id="d" class="jscolor {onFineChange:'update(this)'}" value="" placeholder="Select Colour"></td>
+                                            <td><input id="username5" value="" class="form-control input-group-lg" type="number" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group">
+                                            </td>
+                                            <p id="id" style="display: none"></p>
+                                            <td><button onclick="finEdit(this)" type="button" class="btn btn-success">Edit Activity Type</button></td>
+                                        </tr>
+                                   </a>
+                                </tbody>
+                            <tfoot><tr><span id="table-title2"></span></tr></tfoot></table>  
+                        </div>
+                    </div>
+                </div>
+          </div>
+        </div>
+    </body>
+    <script>
+
+        $("#two").hide();
+        function view_records() {
+            var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "http://localhost:8000/get_category/",
+            "method": "GET",
+            "headers": {
+                "content-type": "application/json",
+                "cache-control": "no-cache",
+                "postman-token": "7518ab53-2737-6f67-d072-39d35150586b"
+                }
+            }
+
+            $.ajax(settings).done(function (response) {
+                var resp = response["categories_dict"];
+                for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
+                    var id = resp[i]["id"];    
+                    var name = resp[i]["name"];
+                    var colour = resp[i]["bar_color"];
+                    var group = resp[i]["group_num"];
+                    var newdiv =  document.createElement('tr');
+                    var c = '#' + colour;
+                    newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+id+'</p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row"  onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
+                    document.getElementById('tb').appendChild(newdiv);
+                    var act = $(".col")
+                    act = act[($(".col").length)-1];
+                    var yy = act.getElementsByTagName("p");
+                    yy[0].style.backgroundColor = c;
+                }
+            });
+        }
+
+        view_records();
+        
+        function update(jscolor) {
+        }
+
+        function deleteThis(obj){
+            var a = $(obj).closest('tr');
+            var act = $(obj).closest('tr').find(".act")     // Gets a descendent with class="nr"
+                       .text();
+            var col = $(obj).closest('tr').find(".col")     // Gets a descendent with class="nr"
+                       .text();
+            var col_id = $(obj).closest('tr').find(".col_id")     // Gets a descendent with class="nr"
+                       .text();
+            var grp = $(obj).closest('tr').find(".grp")     // Gets a descendent with class="nr"
+                       .text();
+            $(obj).closest('tr').remove();
+
+            var v = {
+                "id": col_id
+            };
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:8000/delete_category/",
+                "method": "POST",
+                "headers": {
+                    "content-type": "application/json",
+                    "cache-control": "no-cache",
+                    "postman-token": "4e96da13-a4ce-25e3-bbf1-4b45294d44b5"
+                },
+                "processData": false,
+                "data": JSON.stringify(v)
+                }
+
+                $.ajax(settings).done(function (response) {
+                console.log(response);
+            });
+        }
+
+        function editThis(obj){
+            var a = $(obj).closest('tr');
+            var act = $(obj).closest('tr').find(".act")     // Gets a descendent with class="nr"
+                       .text();
+            var col = $(obj).closest('tr').find(".col")     // Gets a descendent with class="nr"
+                       .text();
+            var col_code = $(obj).closest('tr').find(".col_code")     // Gets a descendent with class="nr"
+                       .text();
+            var col_id = $(obj).closest('tr').find(".col_id")     // Gets a descendent with class="nr"
+                       .text();
+            var grp = $(obj).closest('tr').find(".grp")     // Gets a descendent with class="nr"
+                       .text();
+            $("#one").hide();
+            $("#two").show();
+    
+            document.getElementById('username3').value = act;
+            document.getElementById('d').value = col_code;
+            document.getElementById('id').value = col_id;
+            document.getElementById('d').style.backgroundColor = '#' + col_code;
+            document.getElementById('username5').value = grp;
+        }
+
+        function finEdit(obj) {
+            var fin_act = document.getElementById('username3').value;
+            var fin_col = document.getElementById('d').value;
+            var fin_grp = document.getElementById('username5').value;
+            var fin_id = document.getElementById('id').value;
+
+            var v = {
+                "id": fin_id,
+                "name": fin_act,
+                "bar_color": fin_col,
+                "group_num": fin_grp
+            }
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:8000/edit_category/",
+                "method": "POST",
+                "headers": {
+                    "content-type": "application/json",
+                    "cache-control": "no-cache",
+                    "postman-token": "f59d1572-eef6-33ec-bc79-e357615cbbcb"
+                },
+                "processData": false,
+                "data": JSON.stringify(v)
+            }
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+                $("#two").hide();
+                document.getElementById('tb').innerHTML = "";
+                view_records();
+                $("#one").show();
+            });
+        }
+
+        function addThis(obj){
+            var a = $(obj).closest('tr');
+            var name = document.getElementById("username").value;
+            var colour = document.getElementById("c").value;
+            var group = document.getElementById("username2").value;
+            if (name == "" || colour == "" || group == "") {
+                alert("Enter all values!");
+            } else {
+                /*var newdiv =  document.createElement('tr');
+                var c = '#' + colour;
+                newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a href="#" onclick="editThis(this)">Edit Activity</a></td><td><a href="#" class="delete-row"  onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
+                document.getElementById('tb').appendChild(newdiv);
+                var act = $(".col")
+                act = act[($(".col").length)-1];
+                var yy = act.getElementsByTagName("p");
+                yy[0].style.backgroundColor = c;*/
+                
+                document.getElementById("username").value = "";
+                document.getElementById("c").value = "";
+                document.getElementById("c").style.backgroundColor = "white";
+                document.getElementById("username2").value = "";
+
+                var v = {
+                    "name": name,
+                    "bar_color": colour,
+                    "group_num": group
+                };
+                var settings = {
+                    "async": true,
+                    "crossDomain": true,
+                    "url": "http://localhost:8000/category/",
+                    "method": "POST",
+                    "headers": {
+                        "content-type": "application/json",
+                        "cache-control": "no-cache",
+                        "postman-token": "2e7d4e6e-9974-da09-e400-be3b0d664e75"
+                    },
+                    "processData": false,
+                    "data": JSON.stringify(v)
+                };
+
+                $.ajax(settings).done(function (response) {
+                    console.log(response);
+                    document.getElementById('tb').innerHTML = "";
+                    view_records();
+                });
+            }
+        }
+    </script>
+</html>
+        
