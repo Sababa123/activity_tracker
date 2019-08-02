@@ -124,7 +124,7 @@
                 console.log(response);
                 console.log($(obj).closest('section').remove());
                 console.log($timesp);
-                plot();
+                bar();
                 if ($timesp == "Last 7 Days") {
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
@@ -148,6 +148,8 @@
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart7);
+                } else {
+                    plot();
                 }
             });
         };
@@ -185,30 +187,7 @@
 
                     $("#func").click(function(){
                         var date, start,end, type;
-                        if ($timesp == "Last 7 Days") {
-                        $("#date1").hide();
-                        google.charts.load('current', {'packages':['corechart']});
-                        google.charts.setOnLoadCallback(drawChart1);
-                        } else if ($timesp == "Last 30 Days") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart2);
-                        } else if ($timesp == "Daily") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart4);
-                        } else if ($timesp == "Till Date") {
-                            $("#date1").hide();
-                            plot();
-                        } else if ($timesp == "Weekly") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart6);
-                        } else if ($timesp == "Monthly") {
-                            $("#date1").hide();
-                            google.charts.load('current', {'packages':['corechart']});
-                            google.charts.setOnLoadCallback(drawChart7);
-                        }
+                        
                         date1 = document.getElementById('datepicker').value;
                         start = document.getElementById('start').value;
                         end = document.getElementById('end').value;
@@ -263,12 +242,38 @@
                                 }
 
                                 $.ajax(settings).done(function (response) {
-                                    plot();
                                     bar();
-                                    
+                                    plot();
+                                    if ($timesp == "Last 7 Days") {
+                                    $("#date1").hide();
+                                    google.charts.load('current', {'packages':['corechart']});
+                                    google.charts.setOnLoadCallback(drawChart1);
+                                    } else if ($timesp == "Last 30 Days") {
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart2);
+                                    } else if ($timesp == "Daily") {
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart4);
+                                    } else if ($timesp == "Till Date") {
+                                        $("#date1").hide();
+                                        plot();
+                                    } else if ($timesp == "Weekly") {
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart6);
+                                    } else if ($timesp == "Monthly") {
+                                        $("#date1").hide();
+                                        google.charts.load('current', {'packages':['corechart']});
+                                        google.charts.setOnLoadCallback(drawChart7);
+                                    } else {
+                                        plot();
+                                    }
+
                                     var val = {
                                         "date": date1
-                                    }
+                                    };
 
                                     var settings = {
                                         "async": true,
@@ -347,6 +352,7 @@
                     }
 
                     $.ajax(settings).done(function (response) {
+                        bar();
                         document.getElementById('new').innerHTML = "";
                         var resp = response["custom_date"];
                         for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -354,34 +360,34 @@
                             newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
                             document.getElementById('new').appendChild(newdiv);
                         }
+                        
+                        if ($timesp == "Last 7 Days") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart1);
+                        } else if ($timesp == "Last 30 Days") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart2);
+                        } else if ($timesp == "Daily") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart4);
+                        } else if ($timesp == "Till Date") {
+                            $("#date1").hide();
+                            plot();
+                        } else if ($timesp == "Weekly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart6);
+                        } else if ($timesp == "Monthly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart7);
+                        } else {
+                            plot();
+                        }
                 });
-
-                if ($timesp == "Last 7 Days") {
-                    $("#date1").hide();
-                    google.charts.load('current', {'packages':['corechart']});
-                    google.charts.setOnLoadCallback(drawChart1);
-                } else if ($timesp == "Last 30 Days") {
-                    $("#date1").hide();
-                    google.charts.load('current', {'packages':['corechart']});
-                    google.charts.setOnLoadCallback(drawChart2);
-                } else if ($timesp == "Daily") {
-                    $("#date1").hide();
-                    google.charts.load('current', {'packages':['corechart']});
-                    google.charts.setOnLoadCallback(drawChart4);
-                } else if ($timesp == "Till Date") {
-                    $("#date1").hide();
-                    plot();
-                } else if ($timesp == "Weekly") {
-                    $("#date1").hide();
-                    google.charts.load('current', {'packages':['corechart']});
-                    google.charts.setOnLoadCallback(drawChart6);
-                } else if ($timesp == "Monthly") {
-                    $("#date1").hide();
-                    google.charts.load('current', {'packages':['corechart']});
-                    google.charts.setOnLoadCallback(drawChart7);
-                } else {
-                    plot();
-                }
             });
 
             $("#prev").click(function(){
@@ -404,6 +410,7 @@
                 }
 
                 $.ajax(settings).done(function (response) {
+                    bar();
                     document.getElementById('new').innerHTML = "";
                     var resp = response["custom_date"];
                     for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -457,6 +464,7 @@
                 }
 
                 $.ajax(settings).done(function (response) {
+                    bar();
                     document.getElementById('new').innerHTML = "";
                     var resp = response["custom_date"];
                     for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -1056,10 +1064,8 @@
             google.charts.setOnLoadCallback(drawChart5);
 
             function drawChart5() {
-                var date = new Date();
-                var today = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
                 var d = {
-                    "date": today
+                    "date": document.getElementById("datepicker").value
                 }
                 var settings = {
                     "async": true,
