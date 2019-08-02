@@ -11,8 +11,8 @@
         <link rel="stylesheet" href="styles/kendo.default.min.css" />
         <link rel="stylesheet" href="styles/kendo.default.mobile.min.css" />
 
-        <script src="JS_files/jquery.min.js"></script>
-        <script src="JS_files/kendo.all.min.js"></script>
+        <script src="JS_files/js/jquery.min.js"></script>
+        <script src="JS_files/js/kendo.all.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     </head>
     <body>
@@ -28,7 +28,7 @@
               <h3>Information Pane</h3>
               <div class="demo-section k-content">
                     <label style="margin-top: 2em;">DATE:</label>
-                    <input id="datepicker" value="Choose a date" title="datepicker" style="width: 100%" />
+                    <input id="datepicker" value="" title="datepicker" style="width: 100%" />
                     <div class="col-sm-6">
                         <label style="margin-top: 2em;">START TIME:</label>
                         <input id="start" value="Start time" style="width: 100%;" />
@@ -76,7 +76,9 @@
                       <li><a>Daily</a></li>
                       <li><a>Custom Date</a></li>
                       <li><a>Weekly</a></li>
+                      <li><a>Last 7 Days</a></li>
                       <li><a>Monthly</a></li>
+                      <li><a>Last 30 Days</a></li>
                       <li><a>Till Date</a></li>
                     </ul>
               </div> 
@@ -85,6 +87,8 @@
                 <input id="datepicker1" value="Choose a date" title="datepicker" style="width: 100%"/> 
               </div>   
               <div id="piechart"></div>
+              <div id="act">
+              </div>          
               <div id="chart_div"></div>
             </div>
             <div class="text-right">
@@ -95,27 +99,76 @@
         
     </body>
     <script type="text/javascript">
-        $(document).ready(function() {
+        function deleteThis(obj){
+            var x = $(obj).closest('p');
+            x = x["context"];
+            x = x.getElementsByTagName("p");
+            var d = {
+                "id": x[0].innerHTML
+            };
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:8000/delete_activity/",
+                "method": "POST",
+                "headers": {
+                    "content-type": "application/json",
+                    "cache-control": "no-cache",
+                    "postman-token": "9dccc8b3-67ab-c386-efdd-04d53acc5de0"
+                },
+                "processData": false,
+                "data": JSON.stringify(d)
+            }
 
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+                console.log($(obj).closest('section').remove());
+                console.log($timesp);
+                plot();
+                if ($timesp == "Last 7 Days") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart1);
+                } else if ($timesp == "Last 30 Days") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart2);
+                } else if ($timesp == "Daily") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart4);
+                } else if ($timesp == "Till Date") {
+                    $("#date1").hide();
+                    plot();
+                } else if ($timesp == "Weekly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart6);
+                } else if ($timesp == "Monthly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart7);
+                }
+            });
+        };
+
+        $(document).ready(function() {
             $("#date1").hide();
             var $type;
+
+            var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+            $("#datepicker").data("kendoDatePicker").value(todayDate);
 
             function view_cat () {
                 var settings = {
                     "async": true,
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_category/",
-                    "method": "GET",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "0ea96a59-ff3d-8219-42c2-72ee428489be"
-                    }
+                    "method": "GET"
                 }
 
                 $.ajax(settings).done(function (response) {
                     var resp = response["categories_dict"];
-
                     for (i = 0, len = Object.keys(resp).length; i < len; i++) {    
                         var name = resp[i]["name"];
                         var newdiv =  document.createElement('li');
@@ -132,23 +185,47 @@
 
                     $("#func").click(function(){
                         var date, start,end, type;
+                        if ($timesp == "Last 7 Days") {
+                        $("#date1").hide();
+                        google.charts.load('current', {'packages':['corechart']});
+                        google.charts.setOnLoadCallback(drawChart1);
+                        } else if ($timesp == "Last 30 Days") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart2);
+                        } else if ($timesp == "Daily") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart4);
+                        } else if ($timesp == "Till Date") {
+                            $("#date1").hide();
+                            plot();
+                        } else if ($timesp == "Weekly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart6);
+                        } else if ($timesp == "Monthly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart7);
+                        }
                         date1 = document.getElementById('datepicker').value;
                         start = document.getElementById('start').value;
                         end = document.getElementById('end').value;
                         var abs_start = convert(start);
                         var abs_end = convert(end);
                         var time_diff = diff(abs_start,abs_end);
-                        if (date1 == "Choose a date" || start == "Start time" || end == "End time" || $type == undefined) {
+                        console.log(time_diff);
+                        if (start == "Start time" || end == "End time" || $type == undefined) {
                             alert("Enter all values");
                             document.getElementById('new').appendChild(newdiv);
-                            document.getElementById('datepicker').value = "Choose a date";
                             document.getElementById('start').value = "Start time";
                             document.getElementById('end').value = "End time";
                             document.getElementById('dropdownMenu1').innerHTML = "Choose an activity" + '<span class="caret"></span>';
                         } else {
-                            var newdiv = document.createElement('div');
-                            newdiv.innerHTML = '<div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+start+'  -  '+end+'</div><div class="panel-body">'+$type+'<br></a></div></div></div>' 
-                            document.getElementById('new').appendChild(newdiv);
+                            /*var newdiv = document.createElement('div');
+                            newdiv.innerHTML = '<div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+start+'  -  '+end+'<button type="button" class="close" data-target="#copyright-wrap" data-dismiss="alert"> <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+$type+'<br></a></div></div></div>' 
+                            document.getElementById('new').appendChild(newdiv);*/
                             var v1 = {
                                 "name": $type
                             };
@@ -158,11 +235,6 @@
                                 "crossDomain": true,
                                 "url": "http://localhost:8000/custom_category/",
                                 "method": "POST",
-                                "headers": {
-                                    "content-type": "application/json",
-                                    "cache-control": "no-cache",
-                                    "postman-token": "1b454ff9-329b-2491-6106-9e716ee07371"
-                                },
                                 "processData": false,
                                 "data": JSON.stringify(v1)
                             }
@@ -180,50 +252,42 @@
                                     "category_bar_color": bar_col,
                                     "category_group_num": group_num
                                 }
-
+                                
                                 var settings = {
                                     "async": true,
                                     "crossDomain": true,
                                     "url": "http://localhost:8000/activity/",
                                     "method": "POST",
-                                    "headers": {
-                                        "content-type": "application/json",
-                                        "cache-control": "no-cache",
-                                        "postman-token": "de6c70e8-ae05-6870-d462-ccf51921dd5c"
-                                    },
                                     "processData": false,
                                     "data": JSON.stringify(v)
                                 }
 
                                 $.ajax(settings).done(function (response) {
-                                    console.log(response);
                                     plot();
-                                    if ($timesp == "Weekly") {
-                                        document.getElementById("datepicker1").value = "Choose a date";
-                                        $("#date1").hide();
-                                        google.charts.load('current', {'packages':['corechart']});
-                                        google.charts.setOnLoadCallback(drawChart1);
-                                    } else if ($timesp == "Monthly") {
-                                        document.getElementById("datepicker1").value = "Choose a date";
-                                        $("#date1").hide();
-                                        google.charts.load('current', {'packages':['corechart']});
-                                        google.charts.setOnLoadCallback(drawChart2);
-                                    } else if ($timesp == "Daily") {
-                                        document.getElementById("datepicker1").value = "Choose a date";
-                                        $("#date1").hide();
-                                        google.charts.load('current', {'packages':['corechart']});
-                                        google.charts.setOnLoadCallback(drawChart4);
-                                    } else if ($timesp == "Till Date") {
-                                        document.getElementById("datepicker1").value = "Choose a date";
-                                        $("#date1").hide();
-                                        plot();
-                                    } else if ($timesp == "Custom Date") {
-                                        if (document.getElementById("datepicker1").value == date1) {
-                                            google.charts.load('current', {'packages':['corechart']});
-                                            google.charts.setOnLoadCallback(drawChart3);
-                                        }                       
-                                    }
                                     bar();
+                                    
+                                    var val = {
+                                        "date": date1
+                                    }
+
+                                    var settings = {
+                                        "async": true,
+                                        "crossDomain": true,
+                                        "url": "http://localhost:8000/get_activity/",
+                                            "method": "POST",
+                                            "processData": false,
+                                            "data": JSON.stringify(val)
+                                    }
+
+                                    $.ajax(settings).done(function (response) {
+                                        document.getElementById('new').innerHTML = "";
+                                        var resp = response["custom_date"];
+                                        for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
+                                            var newdiv = document.createElement('div');
+                                            newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
+                                            document.getElementById('new').appendChild(newdiv);
+                                        }
+                                    });
                                 });
                             });
 
@@ -236,6 +300,34 @@
                     });
                 });
             }
+
+            function start(){
+                var curr = $("#datepicker").val();
+                var val = {
+                    "date": curr
+                };
+
+                var settings = {
+                    "async": true,
+                    "crossDomain": true,
+                    "url": "http://localhost:8000/get_activity/",
+                        "method": "POST",
+                        "processData": false,
+                        "data": JSON.stringify(val)
+                    }
+
+                    $.ajax(settings).done(function (response) {
+                        document.getElementById('new').innerHTML = "";
+                        var resp = response["custom_date"];
+                        for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
+                            var newdiv = document.createElement('div');
+                            newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
+                            document.getElementById('new').appendChild(newdiv);
+                        }
+                });
+            }
+
+            start();
 
             view_cat();
             
@@ -250,32 +342,49 @@
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_activity/",
                         "method": "POST",
-                        "headers": {
-                                "content-type": "application/json",
-                                "cache-control": "no-cache",
-                                "postman-token": "3a1f6c4f-38b0-c0a4-f1b2-61cb68b9c501"
-                            },
                         "processData": false,
                         "data": JSON.stringify(val)
                     }
 
                     $.ajax(settings).done(function (response) {
                         document.getElementById('new').innerHTML = "";
-                        var resp = response["custom_date_dict"];
-                        console.log(resp);
-                        for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
+                        var resp = response["custom_date"];
+                        for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
                             var newdiv = document.createElement('div');
-                            newdiv.innerHTML = '<div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'</div><div class="panel-body">'+resp[i]["category_name"]+'<br></a></div></div></div>' 
+                            newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
                             document.getElementById('new').appendChild(newdiv);
                         }
                 });
 
+                if ($timesp == "Last 7 Days") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart1);
+                } else if ($timesp == "Last 30 Days") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart2);
+                } else if ($timesp == "Daily") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart4);
+                } else if ($timesp == "Till Date") {
+                    $("#date1").hide();
+                    plot();
+                } else if ($timesp == "Weekly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart6);
+                } else if ($timesp == "Monthly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart7);
+                } else {
+                    plot();
+                }
             });
 
             $("#prev").click(function(){
-                if(document.getElementById("datepicker").value == "Choose a date") {
-                    alert("Choose a date first!");
-                } else {
                 var date = new Date(document.getElementById("datepicker").value);
                 date.setDate(date.getDate() - 1);
                 var finalDate = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
@@ -290,32 +399,46 @@
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "71eeda1c-a0ed-42ff-4e57-10020e560799"
-                    },
                     "processData": false,
                     "data": JSON.stringify(v)
                 }
 
                 $.ajax(settings).done(function (response) {
                     document.getElementById('new').innerHTML = "";
-                    var resp = response["custom_date_dict"];
-                    console.log(resp);
-                    for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
+                    var resp = response["custom_date"];
+                    for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
                         var newdiv = document.createElement('div');
-                        newdiv.innerHTML = '<div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'</div><div class="panel-body">'+resp[i]["category_name"]+'<br></a></div></div></div>' 
+                        newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
                         document.getElementById('new').appendChild(newdiv);
                     }
+                    if ($timesp == "Last 7 Days") {
+                        $("#date1").hide();
+                        google.charts.load('current', {'packages':['corechart']});
+                        google.charts.setOnLoadCallback(drawChart1);
+                        } else if ($timesp == "Last 30 Days") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart2);
+                        } else if ($timesp == "Daily") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart4);
+                        } else if ($timesp == "Till Date") {
+                            $("#date1").hide();
+                            plot();
+                        } else if ($timesp == "Weekly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart6);
+                        } else if ($timesp == "Monthly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart7);
+                        }
                 });
-            }
         });
 
         $("#next").click(function(){
-            if(document.getElementById("datepicker").value == "Choose a date") {
-                alert("Choose a date first!");
-            } else {
                 var date = new Date(document.getElementById("datepicker").value);
                 date.setDate(date.getDate() + 1);
                 var finalDate = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
@@ -329,26 +452,43 @@
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "71eeda1c-a0ed-42ff-4e57-10020e560799"
-                    },
                     "processData": false,
                     "data": JSON.stringify(v)
                 }
 
                 $.ajax(settings).done(function (response) {
                     document.getElementById('new').innerHTML = "";
-                    var resp = response["custom_date_dict"];
-                    for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
-                        console.log(resp[i]);
+                    var resp = response["custom_date"];
+                    for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
                         var newdiv = document.createElement('div');
-                        newdiv.innerHTML = '<div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'</div><div class="panel-body">'+resp[i]["category_name"]+'<br></a></div></div></div>' 
+                        newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
                         document.getElementById('new').appendChild(newdiv);
                     }
+                    if ($timesp == "Last 7 Days") {
+                        $("#date1").hide();
+                        google.charts.load('current', {'packages':['corechart']});
+                        google.charts.setOnLoadCallback(drawChart1);
+                        } else if ($timesp == "Last 30 Days") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart2);
+                        } else if ($timesp == "Daily") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart4);
+                        } else if ($timesp == "Till Date") {
+                            $("#date1").hide();
+                            plot();
+                        } else if ($timesp == "Weekly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart6);
+                        } else if ($timesp == "Monthly") {
+                            $("#date1").hide();
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart7);
+                        }
                 });
-            }
         });
 
         function tConvert (time) {
@@ -386,12 +526,12 @@
         }).data("kendoTimePicker");
 
         //define min/max range
-        start.min("2:00 AM");
-        start.max("6:00 PM");
+        start.min("12:00 AM");
+        start.max("12:00 AM");
 
         //define min/max range
-        end.min("8:00 AM");
-        end.max("1:45 AM");
+        end.min("12:00 AM");
+        end.max("12:00 AM");
         });
 
         $("#datepicker").kendoDatePicker();
@@ -412,7 +552,6 @@
 
         $("#datepicker").attr("readonly", true);
         $("#monthpicker").attr("readonly", true);
-        $("#datepicker1").attr("readonly", true);
 
         function diff(start, end) {
             start = start.split(":");
@@ -425,7 +564,11 @@
             var minutes = Math.floor(diff / 1000 / 60);
             var min = ((minutes < 9 ? "0" : "") + minutes)/60;
             var actual = min + hours;
-            return (actual);
+            if(actual<0) {
+                return(actual+24);
+            } else {
+                return (actual);
+            }
         }
 
         function convert(x) {
@@ -448,64 +591,65 @@
         $(".dropdown-menu li a").click(function(){
             $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
             $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
-            if ($(this).text() != "Daily" && $(this).text() != "Weekly" && $(this).text() != "Monthly" && $(this).text() != "Till Date"&& $(this).text() != "Custom Date") {
+            if ($(this).text() != "Daily" && $(this).text() != "Weekly" && $(this).text() != "Last 7 Days" && $(this).text() != "Monthly" && $(this).text() != "Last 30 Days" && $(this).text() != "Till Date" && $(this).text() != "Custom Date") {
                 $type = $(this).text();
-            } else if($(this).text() == "Daily" || $(this).text() == "Weekly" || $(this).text() == "Monthly" || $(this).text() == "Till Date" || $(this).text() == "Custom Date") {
+            } else if($(this).text() == "Daily" || $(this).text() == "Weekly" || $(this).text() == "Last 7 Days" || $(this).text() == "Monthly" || $(this).text() == "Last 30 Days" || $(this).text() == "Till Date" || $(this).text() == "Custom Date") {
                 $timesp = $(this).text();
-                if ($timesp == "Weekly") {
-                    document.getElementById("datepicker1").value = "Choose a date";
+                if ($timesp == "Last 7 Days") {
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart1);
-                } else if ($timesp == "Monthly") {
-                    document.getElementById("datepicker1").value = "Choose a date";
+                } else if ($timesp == "Last 30 Days") {
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart2);
                 } else if ($timesp == "Daily") {
-                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
                     google.charts.setOnLoadCallback(drawChart4);
                 } else if ($timesp == "Till Date") {
-                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").hide();
                     plot();
                 } else if ($timesp == "Custom Date") {
-                    document.getElementById("datepicker1").value = "Choose a date";
                     $("#date1").show();
                     $("#date1").change(function(){
                         google.charts.load('current', {'packages':['corechart']});
                         google.charts.setOnLoadCallback(drawChart3);
                     });
-                }
-            }
+                } else if ($timesp == "Weekly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart6);
+                } else if ($timesp == "Monthly") {
+                    $("#date1").hide();
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart7);
+                } 
+            } 
         });
 
-        function plot() {
+        function plot () {
             google.charts.load('current', {'packages':['corechart']});
             google.charts.setOnLoadCallback(drawChart);
 
             // Draw the chart and set the chart values
             function drawChart() {
+                document.getElementById("act").innerHTML = "";
+
                 var settings = {
                     "async": true,
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                    },
                     "processData": false,
                     "data": "{\n\t\"date\":\"7/25/2019\"\n}"
                 }
 
                 $.ajax(settings).done(function (response) {
                     var colors = {};
-                    var resp = response["tilldate_dict"];
+                    var resp = response["tilldate"];
                     var resp1 = resp["category"];
+                    var resp2 = resp["groups"];
                     var data = new google.visualization.DataTable();
                     data.addColumn('string', 'Activity');
                     data.addColumn('number', 'Total Hours');
@@ -524,8 +668,15 @@
                         slices.push({
                         color: colors[data.getValue(i, 0)]
                         });
-                    }
-                    
+                    };
+
+                    document.getElementById('act').innerHTML = "";
+                    for (var index in resp2) { 
+                        var newdiv = document.createElement('div');
+                        newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                        document.getElementById('act').appendChild(newdiv);
+                    };
+
                     var options = {'title':'Hours Spared', 'width':550, 'height':400};
                     var container = document.getElementById('piechart');
                     var chart = new google.visualization.PieChart(container);
@@ -542,36 +693,29 @@
 
         plot();
         function drawChart4() {
-            var date = new Date();
-            var today = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
-            console.log(today);
+            document.getElementById("act").innerHTML = "";
+
             var d = {
-                "date": today
+                "date": document.getElementById("datepicker").value
             }
             var settings = {
                 "async": true,
                 "crossDomain": true,
                 "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                },
                 "processData": false,
                 "data": JSON.stringify(d)
             }
 
             $.ajax(settings).done(function (response) {
                 var colors = {};
-                var resp = response["custom_date_dict"];
+                var resp = response["custom_date"];
                 var resp1 = resp["category"];
+                var resp2 = resp["groups"];
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Activity');
                 data.addColumn('number', 'Total Hours');
                 for (var index in resp1) { 
-                    console.log(index);
-                    console.log(resp1[index]);
                     data.addRows([
                         [index,resp1[index]["total"]]
                     ]);
@@ -588,6 +732,13 @@
                     });
                 }
                 
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
+
                 var container = document.getElementById('piechart');
                 var chart = new google.visualization.PieChart(container);
                 chart.draw(data, {
@@ -601,24 +752,26 @@
         }
 
         function drawChart1() {
+            document.getElementById("act").innerHTML = "";
+
+            var v = {
+                "date":document.getElementById("datepicker").value
+            };
+
             var settings = {
                 "async": true,
                 "crossDomain": true,
                 "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                },
                 "processData": false,
-                "data": "{\n\t\"date\":\"7/25/2019\"\n}"
-            }
+                "data": JSON.stringify(v)
+            };
 
             $.ajax(settings).done(function (response) {
                 var colors = {};
-                var resp = response["week_dict"];
+                var resp = response["last_7"];
                 var resp1 = resp["category"];
+                var resp2 = resp["groups"];
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Activity');
                 data.addColumn('number', 'Total Hours');
@@ -638,7 +791,14 @@
                     color: colors[data.getValue(i, 0)]
                     });
                 }
-                
+
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
+
                 var container = document.getElementById('piechart');
                 var chart = new google.visualization.PieChart(container);
                 chart.draw(data, {
@@ -652,24 +812,26 @@
         }
 
         function drawChart2() {
+            document.getElementById("act").innerHTML = "";
+
+            var v = {
+                "date":document.getElementById("datepicker").value
+            };
+
             var settings = {
                 "async": true,
                 "crossDomain": true,
                 "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                },
                 "processData": false,
-                "data": "{\n\t\"date\":\"7/25/2019\"\n}"
+                "data": JSON.stringify(v)
             }
 
             $.ajax(settings).done(function (response) {
                 var colors = {};
-                var resp = response["month_dict"];
+                var resp = response["last_30"];
                 var resp1 = resp["category"];
+                var resp2 = resp["groups"];
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Activity');
                 data.addColumn('number', 'Total Hours');
@@ -681,6 +843,13 @@
                 };
 
                 data.sort([{column: 1, desc: true}]);
+
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
 
                 //build slices
                 var slices = [];
@@ -704,6 +873,8 @@
         }
 
         function drawChart3() {
+            document.getElementById("act").innerHTML = "";
+
             var d = {
                 "date": document.getElementById("datepicker1").value
             };
@@ -713,19 +884,15 @@
                 "crossDomain": true,
                 "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                },
                 "processData": false,
                 "data": JSON.stringify(d)
             };
 
             $.ajax(settings).done(function (response) {
                 var colors = {};
-                var resp = response["custom_date_dict"];
+                var resp = response["custom_date"];
                 var resp1 = resp["category"];
+                var resp2 = resp["groups"];
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Activity');
                 data.addColumn('number', 'Total Hours');
@@ -737,6 +904,132 @@
                 };
 
                 data.sort([{column: 1, desc: true}]);
+
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
+
+                //build slices
+                var slices = [];
+                for (var i = 0; i < data.getNumberOfRows(); i++) {
+                    slices.push({
+                    color: colors[data.getValue(i, 0)]
+                    });
+                }
+                
+                var container = document.getElementById('piechart');
+                var chart = new google.visualization.PieChart(container);
+                chart.draw(data, {
+                    slices: slices,
+                    'title':'Hours Spared', 
+                    'width':550, 
+                    'height':400,
+                     is3D: true
+                });
+            });
+        }
+
+        function drawChart6() {
+            document.getElementById("act").innerHTML = "";
+
+            var v = {
+                "date":document.getElementById("datepicker").value
+            };
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:8000/get_activity/",
+                "method": "POST",
+                "processData": false,
+                "data": JSON.stringify(v)
+            };
+
+            $.ajax(settings).done(function (response) {
+                var colors = {};
+                var resp = response["tillweek"];
+                var resp1 = resp["category"];
+                var resp2 = resp["groups"];
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Activity');
+                data.addColumn('number', 'Total Hours');
+                for (var index in resp1) { 
+                    data.addRows([
+                        [index,resp1[index]["total"]]
+                    ]);
+                    colors[index] = resp1[index]["category_bar_color"];
+                };
+
+                data.sort([{column: 1, desc: true}]);
+                
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
+
+                //build slices
+                var slices = [];
+                for (var i = 0; i < data.getNumberOfRows(); i++) {
+                    slices.push({
+                    color: colors[data.getValue(i, 0)]
+                    });
+                }
+                
+                var container = document.getElementById('piechart');
+                var chart = new google.visualization.PieChart(container);
+                chart.draw(data, {
+                    slices: slices,
+                    'title':'Hours Spared', 
+                    'width':550, 
+                    'height':400,
+                     is3D: true
+                });
+            });
+        }
+
+        function drawChart7() {
+            document.getElementById("act").innerHTML = "";
+            var v = {
+                "date":document.getElementById("datepicker").value
+            };
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:8000/get_activity/",
+                "method": "POST",
+                "processData": false,
+                "data": JSON.stringify(v)
+            };
+
+            $.ajax(settings).done(function (response) {
+                var colors = {};
+                var resp = response["month"];
+                var resp1 = resp["category"];
+                var resp2 = resp["groups"];
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Activity');
+                data.addColumn('number', 'Total Hours');
+                for (var index in resp1) { 
+                    data.addRows([
+                        [index,resp1[index]["total"]]
+                    ]);
+                    colors[index] = resp1[index]["category_bar_color"];
+                };
+
+                data.sort([{column: 1, desc: true}]);
+
+                document.getElementById('act').innerHTML = "";
+                for (var index in resp2) { 
+                    var newdiv = document.createElement('div');
+                    newdiv.innerHTML = '<div class="panel panel-info"><div class="panel-heading">'+index+' activities: '+resp2[index]+' hr(s)</div>' 
+                    document.getElementById('act').appendChild(newdiv);
+                };
 
                 //build slices
                 var slices = [];
@@ -765,7 +1058,6 @@
             function drawChart5() {
                 var date = new Date();
                 var today = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
-                console.log(today);
                 var d = {
                     "date": today
                 }
@@ -774,11 +1066,6 @@
                     "crossDomain": true,
                     "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "b87320b5-2be0-853e-c317-1e5a02a4fdd2"
-                    },
                     "processData": false,
                     "data": JSON.stringify(d)
                 }
@@ -788,7 +1075,7 @@
                     var dat = {};
                     var arr = [];
                     var series = [];
-                    var resp = response["custom_date_dict"];
+                    var resp = response["custom_date"];
                     var resp1 = resp["category"];
                     var data = new google.visualization.DataTable();
                     data.addColumn('string', 'Time');
@@ -801,12 +1088,14 @@
                         };
                         series.push(dict);
                     };
-                    data.addRows(Object.keys(resp).length-2);
+                    data.addRows(Object.keys(resp).length-3);
                     for (i = 0, len = arr.length; i < len; i++) {
-                        for (j = 0, len1 = Object.keys(resp).length-2; j < len1; j++) { 
+                        for (j = 0, len1 = Object.keys(resp).length-3; j < len1; j++) { 
                             if(arr[i] == resp[j]["category_name"]) {
                                 data.setValue(j, 0, tConvert(resp[j]["start_time"]).toString());
                                 data.setValue(j, i+1, resp[j]["elapsed_time"]);
+                            } else {
+                                console.log("No",+arr[i]+resp[j]["category_name"]+j);
                             }
                         }
                     };
@@ -830,6 +1119,6 @@
             }
             return time.join (''); // return adjusted time or original string
         }
-        bar();                   
+        bar();   
     </script>
 </html>

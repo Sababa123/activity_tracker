@@ -101,7 +101,7 @@
                     var group = resp[i]["group_num"];
                     var newdiv =  document.createElement('tr');
                     var c = '#' + colour;
-                    newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+id+'</p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row"  onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
+                    newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+id+'</p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row" onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
                     document.getElementById('tb').appendChild(newdiv);
                     var act = $(".col")
                     act = act[($(".col").length)-1];
