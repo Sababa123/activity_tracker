@@ -84,12 +84,7 @@
             "async": true,
             "crossDomain": true,
             "url": "http://localhost:8000/get_category/",
-            "method": "GET",
-            "headers": {
-                "content-type": "application/json",
-                "cache-control": "no-cache",
-                "postman-token": "7518ab53-2737-6f67-d072-39d35150586b"
-                }
+            "method": "GET"
             }
 
             $.ajax(settings).done(function (response) {
@@ -137,11 +132,6 @@
                 "crossDomain": true,
                 "url": "http://localhost:8000/delete_category/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "4e96da13-a4ce-25e3-bbf1-4b45294d44b5"
-                },
                 "processData": false,
                 "data": JSON.stringify(v)
                 }
@@ -191,11 +181,6 @@
                 "crossDomain": true,
                 "url": "http://localhost:8000/edit_category/",
                 "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                    "cache-control": "no-cache",
-                    "postman-token": "f59d1572-eef6-33ec-bc79-e357615cbbcb"
-                },
                 "processData": false,
                 "data": JSON.stringify(v)
             }
@@ -241,11 +226,6 @@
                     "crossDomain": true,
                     "url": "http://localhost:8000/category/",
                     "method": "POST",
-                    "headers": {
-                        "content-type": "application/json",
-                        "cache-control": "no-cache",
-                        "postman-token": "2e7d4e6e-9974-da09-e400-be3b0d664e75"
-                    },
                     "processData": false,
                     "data": JSON.stringify(v)
                 };
