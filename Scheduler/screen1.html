@@ -997,6 +997,7 @@
 
         function drawChart7() {
             document.getElementById("act").innerHTML = "";
+
             var v = {
                 "date":document.getElementById("datepicker").value
             };
@@ -1008,11 +1009,12 @@
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
-            };
+            }
 
             $.ajax(settings).done(function (response) {
                 var colors = {};
                 var resp = response["month"];
+                console.log(resp);
                 var resp1 = resp["category"];
                 var resp2 = resp["groups"];
                 var data = new google.visualization.DataTable();
@@ -1042,6 +1044,7 @@
                     });
                 }
                 
+                var options = {'title':'Hours Spared', 'width':550, 'height':400};
                 var container = document.getElementById('piechart');
                 var chart = new google.visualization.PieChart(container);
                 chart.draw(data, {

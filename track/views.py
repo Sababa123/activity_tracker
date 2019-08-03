@@ -120,9 +120,9 @@ def get_records(request, *args, **kwargs):
     monthly_gnum_elapsed = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date]).values('category_group_num').annotate(Sum('elapsed_time'))
 
     monthnum_activities = ActivityTracker.objects.filter(date__month=int(m))
-    monthnum_elapsed = ActivityTracker.objects.filter(date__month="8").values('category_name').annotate(Sum('elapsed_time'))
-    monthnum_categories = ActivityTracker.objects.filter(date__month="8").values('category_name','category_bar_color','category_group_num').distinct()
-    monthnum_gnum_elapsed = ActivityTracker.objects.filter(date__month="8").values('category_group_num').annotate(Sum('elapsed_time'))
+    monthnum_elapsed = ActivityTracker.objects.filter(date__month=int(m)).values('category_name').annotate(Sum('elapsed_time'))
+    monthnum_categories = ActivityTracker.objects.filter(date__month=int(m)).values('category_name','category_bar_color','category_group_num').distinct()
+    monthnum_gnum_elapsed = ActivityTracker.objects.filter(date__month=int(m)).values('category_group_num').annotate(Sum('elapsed_time'))
 
     tilldate_activities = ActivityTracker.objects.all()
     tilldate_elapsed = ActivityTracker.objects.all().values('category_name').annotate(Sum('elapsed_time'))
