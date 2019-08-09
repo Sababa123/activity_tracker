@@ -203,8 +203,12 @@
                                 if(Object.keys(response["custom_date"]).length > 3) {
                                     var record = response["custom_date"][(Object.keys(response["custom_date"]).length)-4];
                                     console.log(record);
-                                    document.getElementById("start").value = tConvert(record["end_time"]);
-                                    document.getElementById("end").value = tConvert(addMinutes(record["end_time"], '15'));
+                                    //$("#start").kendoTimePicker();
+                                    var timepicker = $("#start").data("kendoTimePicker");
+                                    timepicker.value(tConvert(record["end_time"]));
+                                    //$("#end").kendoTimePicker();
+                                    var timepicker1 = $("#end").data("kendoTimePicker");
+                                    timepicker1.value(tConvert(addMinutes(record["end_time"], '15')));
                                 } else {
                                     document.getElementById("start").value = "Start Date";
                                     document.getElementById("end").value = "End Date";
@@ -212,8 +216,12 @@
                             });
                         } else {
                             var record = resp[Object.keys(resp).length-4];
-                            document.getElementById("start").value = tConvert(record["end_time"]);
-                            document.getElementById("end").value = tConvert(addMinutes(record["end_time"], '15'));
+                            //$("#start").kendoTimePicker();
+                            var timepicker = $("#start").data("kendoTimePicker");
+                            timepicker.value(tConvert(record["end_time"]));
+                            //$("#end").kendoTimePicker();
+                            var timepicker1 = $("#end").data("kendoTimePicker");
+                            timepicker1.value(tConvert(addMinutes(record["end_time"], '15')));
                         }
                 });
             };
