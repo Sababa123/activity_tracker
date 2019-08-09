@@ -1,3 +1,5 @@
+
+    
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template import RequestContext
@@ -9,8 +11,10 @@ from .models import ActivityTracker, Activity
 import json
 from datetime import timedelta, datetime, date
 from django.db.models import Sum
+from django.db.models import Q
 
 today = date.today()
+yesterday = today - timedelta(days=1)
 
 # dateStr = today.strftime("%d %b %Y ")
 
@@ -64,7 +68,7 @@ def get_records(request, *args, **kwargs):
         
         custom_date_activities_dict["groups"] = {}
         for elapsed_time in custom_date_gnum_elapsed:
-            custom_date_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+            custom_date_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
         start_week = custom_date - timedelta(custom_date.weekday())
         end_week = start_week + timedelta(6)
@@ -100,9 +104,7 @@ def get_records(request, *args, **kwargs):
 
         custom_week_activities_dict["groups"] = {}
         for elapsed_time in custom_week_gnum_elapsed:
-            custom_week_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
-
-
+            custom_week_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"] 
 
     daily_activities = ActivityTracker.objects.filter(date=today)
     daily_categories = ActivityTracker.objects.filter(date=today).values('category_name','category_bar_color','category_group_num').distinct()
@@ -157,7 +159,7 @@ def get_records(request, *args, **kwargs):
     
     daily_activities_dict["groups"] = {}
     for elapsed_time in daily_gnum_elapsed:
-        daily_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+        daily_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
 # --------------------------Weekly--------------------------------------
      
@@ -187,7 +189,7 @@ def get_records(request, *args, **kwargs):
     
     weekly_activities_dict["groups"] = {}
     for elapsed_time in weekly_gnum_elapsed:
-        weekly_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+        weekly_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
 # --------------------------Monthly Num--------------------------------------
     if "date" in request_data:
@@ -217,7 +219,7 @@ def get_records(request, *args, **kwargs):
         
         monthnum_activities_dict["groups"] = {}
         for elapsed_time in monthnum_gnum_elapsed:
-            monthnum_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+            monthnum_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
 # --------------------------Monthly--------------------------------------
 
@@ -247,7 +249,7 @@ def get_records(request, *args, **kwargs):
 
     monthly_activities_dict["groups"] = {}
     for elapsed_time in monthly_gnum_elapsed:
-        monthly_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+        monthly_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
 # --------------------------Till Date--------------------------------------
     
@@ -277,7 +279,7 @@ def get_records(request, *args, **kwargs):
     
     tilldate_activities_dict["groups"] = {}
     for elapsed_time in tilldate_gnum_elapsed:
-        tilldate_activities_dict["groups"]["Group " + str(elapsed_time["category_group_num"])] = elapsed_time["elapsed_time__sum"]
+        tilldate_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
     
     return JsonResponse({
@@ -303,6 +305,7 @@ def add_activity(request):
     category_bar_color = request_data["category_bar_color"]
     category_group_num = request_data["category_group_num"]
 
+
     # date_entry = "2019,7,22"
     m, d, y = map(int, date.split('/'))
     custom_date = datetime(y, m, d)
@@ -319,8 +322,6 @@ def add_activity(request):
     row.save()
     return JsonResponse({"status":"True", "message":"Activity has been added."})
 
-
-
 @csrf_exempt
 def add_category(request):
     request_data = json.loads(request.body)
@@ -328,11 +329,13 @@ def add_category(request):
     name = request_data["name"]
     bar_color = request_data["bar_color"]
     group_num = request_data["group_num"]
+    rank = request_data["rank"]
 
     row = Activity(
         name=name,
         bar_color=bar_color,
-        group_num=group_num
+        group_num=group_num,
+        rank=rank
     )
     row.save()
     return JsonResponse({"status":"True", "message":"Category has been added."})
@@ -341,15 +344,15 @@ def add_category(request):
 @csrf_exempt
 def category(request, *args, **kwargs):
     categories_dict = {}
-    categories = Activity.objects.all()
+    categories = Activity.objects.all().order_by('rank')
     for i, category in enumerate(categories):
         categories_dict[i] = {
             "id":category.id,
             "name":category.name,
             "bar_color":category.bar_color,
-            "group_num":category.group_num
+            "group_num":category.group_num,
+            "rank":category.rank
             }
-
     return JsonResponse({"categories_dict":categories_dict})
 
 
@@ -359,13 +362,14 @@ def custom_category(request, *args, **kwargs):
 
     category_name = request_data["name"]
     categories_dict = {}
-    categories = Activity.objects.filter(name__iexact=category_name)
+    categories = Activity.objects.filter(name__iexact=category_name).order_by('rank')
     for i, category in enumerate(categories):
         categories_dict[i] = {
             "id":category.id,
             "name":category.name,
             "bar_color":category.bar_color,
-            "group_num":category.group_num
+            "group_num":category.group_num,
+            "rank":category.rank
             }
 
     return JsonResponse({"categories_dict":categories_dict})
@@ -379,6 +383,7 @@ def edit_category(request):
     name = request_data["name"]
     bar_color = request_data["bar_color"]
     group_num = request_data["group_num"]
+    rank = request_data["rank"]
 
     if bar_color:
         activities = ActivityTracker.objects.filter(category_name__iexact=name)
@@ -396,6 +401,7 @@ def edit_category(request):
     activity.name = name
     activity.bar_color = bar_color
     activity.group_num = group_num
+    activity.rank = rank
     activity.save()
 
     return JsonResponse({"status":"True", "message":"Category has been edited."})
@@ -419,9 +425,3 @@ def delete_activity(request):
     activity = ActivityTracker.objects.get(pk=_id)
     activity.delete()
     return JsonResponse({"status":"True", "message":"Activity has been deleted."})
-
-
-
-
-
-

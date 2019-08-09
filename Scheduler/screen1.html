@@ -14,6 +14,12 @@
         <script src="JS_files/js/jquery.min.js"></script>
         <script src="JS_files/js/kendo.all.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+        <style>
+            a:hover { 
+                text-decoration: none; 
+            } 
+        </style>
     </head>
     <body>
 
@@ -109,7 +115,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/delete_activity/",
+                "url": "http://localhost:8000/delete_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(d)
@@ -120,6 +126,7 @@
                 console.log($(obj).closest('section').remove());
                 console.log($timesp);
                 bar();
+                update_startDate();
                 if ($timesp == "Last 7 Days") {
                     $("#date1").hide();
                     google.charts.load('current', {'packages':['corechart']});
@@ -149,6 +156,68 @@
             });
         };
 
+        function addMinutes(time, minsToAdd) {
+            function D(J){ return (J<10? '0':'') + J};    
+            var piece = time.split(':');
+            var mins = piece[0]*60 + +piece[1] + +minsToAdd;
+            return D(mins%(24*60)/60 | 0) + ':' + D(mins%60);  
+        }  
+
+            function update_startDate(){
+                var curr = $("#datepicker").val();
+                var val = {
+                    "date": curr
+                };
+
+                var settings = {
+                    "async": true,
+                    "crossDomain": true,
+                    "url": "http://localhost:8000/get_activity/",
+                        "method": "POST",
+                        "processData": false,
+                        "data": JSON.stringify(val)
+                    }
+
+                    $.ajax(settings).done(function (response) {
+                        var resp = response["custom_date"];
+                        if (Object.keys(resp).length == 3) {
+                            var date = new Date(document.getElementById("datepicker").value);
+                            date.setDate(date.getDate() - 1);
+                            var finalDate = (date.getMonth()+1) +'/'+ date.getDate() +'/'+date.getFullYear();
+                            
+                            var val = {
+                                "date": finalDate
+                            };
+                            
+                            var settings = {
+                                "async": true,
+                                "crossDomain": true,
+                                "url": "http://localhost:8000/get_activity/",
+                                "method": "POST",
+                                "processData": false,
+                                "data": JSON.stringify(val)
+                            }
+
+                            $.ajax(settings).done(function (response) {
+                                console.log(response["custom_date"]);
+                                if(Object.keys(response["custom_date"]).length > 3) {
+                                    var record = response["custom_date"][(Object.keys(response["custom_date"]).length)-4];
+                                    console.log(record);
+                                    document.getElementById("start").value = tConvert(record["end_time"]);
+                                    document.getElementById("end").value = tConvert(addMinutes(record["end_time"], '15'));
+                                } else {
+                                    document.getElementById("start").value = "Start Date";
+                                    document.getElementById("end").value = "End Date";
+                                }
+                            });
+                        } else {
+                            var record = resp[Object.keys(resp).length-4];
+                            document.getElementById("start").value = tConvert(record["end_time"]);
+                            document.getElementById("end").value = tConvert(addMinutes(record["end_time"], '15'));
+                        }
+                });
+            };
+
         $(document).ready(function() {
             $("#date1").hide();
             var $type;
@@ -160,7 +229,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_category/",
+                    "url": "http://localhost:8000/get_category/",
                     "method": "GET"
                 }
 
@@ -168,9 +237,17 @@
                     var resp = response["categories_dict"];
                     for (i = 0, len = Object.keys(resp).length; i < len; i++) {    
                         var name = resp[i]["name"];
+                        var col = resp[i]["bar_color"];
                         var newdiv =  document.createElement('li');
-                        newdiv.innerHTML = '<a>'+name+'</a>';
-                       $('#list').append(newdiv);
+                        newdiv.innerHTML = '<div class="col-md-12" style="margin-top:5px;"><div class="col-sm-6"><a style="color:"black";>'+name+'</a></div><div class="col-md-6"><span class="pull-right"><p style="width:50px; height:15px;" class="col"></p></span></div></div>';
+                        $('#list').append(newdiv);
+                        var c = '#' + col;
+                        var act = $(".col");
+                        act = act[($(".col").length)-1];
+                        console.log(act);
+                        /*var yy = act[0].getElementsByTagName("P");
+                        console.log(yy);*/
+                        act.style.backgroundColor = c;
                     }
 
                     $("body").on('click', '.dropdown-menu li a', function () {
@@ -207,7 +284,7 @@
                             var settings = {
                                 "async": true,
                                 "crossDomain": true,
-                                "url": "https://trackactivities.herokuapp.com/custom_category/",
+                                "url": "http://localhost:8000/custom_category/",
                                 "method": "POST",
                                 "processData": false,
                                 "data": JSON.stringify(v1)
@@ -230,7 +307,7 @@
                                 var settings = {
                                     "async": true,
                                     "crossDomain": true,
-                                    "url": "https://trackactivities.herokuapp.com/activity/",
+                                    "url": "http://localhost:8000/activity/",
                                     "method": "POST",
                                     "processData": false,
                                     "data": JSON.stringify(v)
@@ -239,6 +316,7 @@
                                 $.ajax(settings).done(function (response) {
                                     bar();
                                     plot();
+                                    update_startDate();
                                     if ($timesp == "Last 7 Days") {
                                     $("#date1").hide();
                                     google.charts.load('current', {'packages':['corechart']});
@@ -273,7 +351,7 @@
                                     var settings = {
                                         "async": true,
                                         "crossDomain": true,
-                                        "url": "https://trackactivities.herokuapp.com/get_activity/",
+                                        "url": "http://localhost:8000/get_activity/",
                                             "method": "POST",
                                             "processData": false,
                                             "data": JSON.stringify(val)
@@ -310,7 +388,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                         "method": "POST",
                         "processData": false,
                         "data": JSON.stringify(val)
@@ -324,11 +402,11 @@
                             newdiv.innerHTML = '<section><div class="col-md-16"><div class="panel panel-primary copyright-wrap" id="copyright-wrap"><div class="panel-heading">'+tConvert(resp[i]["start_time"])+'  -  '+tConvert(resp[i]["end_time"])+'<button type="button" onclick="deleteThis(this)" class="close" data-dismiss="alert"><p style="display:none">'+resp[i]["id"]+'</p><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">'+resp[i]["category_name"]+'<br></div></div></div></section>' 
                             document.getElementById('new').appendChild(newdiv);
                         }
+                        update_startDate();
                 });
             }
 
             start();
-
             view_cat();
             
             $("#datepicker").change(function(){
@@ -340,7 +418,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                         "method": "POST",
                         "processData": false,
                         "data": JSON.stringify(val)
@@ -348,6 +426,7 @@
 
                     $.ajax(settings).done(function (response) {
                         bar();
+                        update_startDate();
                         document.getElementById('new').innerHTML = "";
                         var resp = response["custom_date"];
                         for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -398,7 +477,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
                     "processData": false,
                     "data": JSON.stringify(v)
@@ -406,6 +485,7 @@
 
                 $.ajax(settings).done(function (response) {
                     bar();
+                    update_startDate();
                     document.getElementById('new').innerHTML = "";
                     var resp = response["custom_date"];
                     for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -452,7 +532,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
                     "processData": false,
                     "data": JSON.stringify(v)
@@ -460,6 +540,7 @@
 
                 $.ajax(settings).done(function (response) {
                     bar();
+                    update_startDate();
                     document.getElementById('new').innerHTML = "";
                     var resp = response["custom_date"];
                     for (i = 0, len = Object.keys(resp).length-3; i < len; i++) { 
@@ -642,7 +723,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
                     "processData": false,
                     "data": "{\n\t\"date\":\"7/25/2019\"\n}"
@@ -704,7 +785,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(d)
@@ -764,7 +845,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
@@ -824,7 +905,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
@@ -885,7 +966,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(d)
@@ -945,7 +1026,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
@@ -1005,7 +1086,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/get_activity/",
+                "url": "http://localhost:8000/get_activity/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
@@ -1068,7 +1149,7 @@
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/get_activity/",
+                    "url": "http://localhost:8000/get_activity/",
                     "method": "POST",
                     "processData": false,
                     "data": JSON.stringify(d)

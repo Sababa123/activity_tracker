@@ -8,13 +8,23 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-
         <link href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/css/bootstrap-colorpicker.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" rel="stylesheet">
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/js/bootstrap-colorpicker.js"></script>
         <script type="text/javascript" src="http://chir.ag/projects/ntc/ntc.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
         <script src="JS_files/jscolor.js"></script>
     </head>
+
+    <style>
+        td:hover{
+            cursor:move;
+        }
+    </style>
+
     <body>
 
         <div class="jumbotron text-center">
@@ -27,7 +37,7 @@
                 <div class="col-md-12">
                     <div class="text-center">
                         <div id = "one">
-                            <table class="table table-hover" id="paper-table"><thead><tr><td><b>Activity Name</b></td><td><b>Colour</b></td><td><b>Activity Group</b></td><td></td></tr></thead>
+                            <table class="table table-hover" id="paper-table"><thead><tr><td onclick="sortTable(0)"><b>Activity Name</b><a><i class="fa fa-fw fa-sort"></i></a></td><td onclick="sortColorTable(1)"><b>Colour</b><a><i class="fa fa-fw fa-sort"></i></a></td><td onclick="sortTable(2)"><b>Activity Group</b><a><i class="fa fa-fw fa-sort"></i></a></td></tr></thead>
                                 <br>
                                 <tbody  id="tb">
 
@@ -39,10 +49,10 @@
                                 <tbody>
                                     <a>
                                         <tr>
-                                            <td><input id="username" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name">
+                                            <td><input style="text-align: center" id="username" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name">
                                             </td>
-                                            <td><input id="c" class="jscolor {onFineChange:'update(this)'}" value="" placeholder="Select Colour"></td>
-                                            <td><input id="username2" value="" class="form-control input-group-lg" type="number" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group">
+                                            <td><input style="text-align: center" id="c" class="jscolor {onFineChange:'update(this)'}" value="" placeholder="Select Colour"></td>
+                                            <td><input style="text-align: center" id="username2" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group">
                                             </td>
                                             <td><button onclick="addThis(this)" type="button" class="btn btn-success">Add Activity Type</button></td>
                                         </tr>
@@ -53,24 +63,6 @@
                                 <a href="screen1.html" class="btn btn-link" role="button">Go to activity page...</a>
                             </div>
                         </div>
-                        <div id="two">
-                            <table class="table table-hover" id="paper-table2"><thead><tr><td><b>Activity Name</b></td><td><b>Colour</b></td><td><b>Activity Group</b></td><td></td></tr></thead>
-                                <br>
-                                <tbody>
-                                    <a>
-                                        <tr>
-                                            <td><input id="username3" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name">
-                                            </td>
-                                            <td><input id="d" class="jscolor {onFineChange:'update(this)'}" value="" placeholder="Select Colour"></td>
-                                            <td><input id="username5" value="" class="form-control input-group-lg" type="number" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group">
-                                            </td>
-                                            <p id="id" style="display: none"></p>
-                                            <td><button onclick="finEdit(this)" type="button" class="btn btn-success">Edit Activity Type</button></td>
-                                        </tr>
-                                   </a>
-                                </tbody>
-                            <tfoot><tr><span id="table-title2"></span></tr></tfoot></table>  
-                        </div>
                     </div>
                 </div>
           </div>
@@ -78,17 +70,17 @@
     </body>
     <script>
 
-        $("#two").hide();
         function view_records() {
             var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "https://trackactivities.herokuapp.com/get_category/",
+            "url": "http://localhost:8000/get_category/",
             "method": "GET"
             }
 
             $.ajax(settings).done(function (response) {
                 var resp = response["categories_dict"];
+                console.log(Object.keys(resp).length);
                 for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
                     var id = resp[i]["id"];    
                     var name = resp[i]["name"];
@@ -96,7 +88,7 @@
                     var group = resp[i]["group_num"];
                     var newdiv =  document.createElement('tr');
                     var c = '#' + colour;
-                    newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+id+'</p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row" onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
+                    newdiv.innerHTML = '<tr><td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+id+'</p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row" onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td></tr>';
                     document.getElementById('tb').appendChild(newdiv);
                     var act = $(".col")
                     act = act[($(".col").length)-1];
@@ -107,8 +99,191 @@
         }
 
         view_records();
-        
-        function update(jscolor) {
+
+        var fixHelperModified = function(e, tr) {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index) {
+                $(this).width($originals.eq(index).width())
+            });
+            return $helper;
+	    },
+		updateIndex = function(e, ui) {
+			$('td.index', ui.item.parent()).each(function (i) {
+				$(this).html(i+1);
+			});
+			$('input[type=text]', ui.item.parent()).each(function (i) {
+				$(this).val(i + 1);
+			});
+		};
+
+        $("#paper-table tbody").sortable({
+            helper: fixHelperModified,
+            stop: updateIndex
+        }).disableSelection();
+	
+		$("tbody").sortable({
+            distance: 5,
+            delay: 100,
+            opacity: 0.6,
+            cursor: 'move',
+            update: function() {
+                var name;
+                var col;
+                var group;
+                var rank;
+                var id;
+                for (i = 0; i < $("#paper-table tbody tr").length; i++) {
+                    for (j = 0; j < $("#paper-table tbody tr")[i].getElementsByTagName("TD").length; j++) {
+                        if(j == 0){
+                            name = $("#paper-table tbody tr")[i].getElementsByTagName("TD")[j].innerHTML;
+                        } else if(j == 1) {
+                            var s = $("#paper-table tbody tr")[i].getElementsByTagName("TD")[j];
+                            col = s.getElementsByTagName("P")[2].innerHTML;
+                            id = s.getElementsByTagName("P")[1].innerHTML;
+                        } else if(j == 2) {
+                            group = $("#paper-table tbody tr")[i].getElementsByTagName("TD")[j].innerHTML;
+                        }
+                        rank = i;
+                    }
+                    var final = {
+                        "id": id,
+                        "name": name,
+                        "bar_color": col,
+                        "group_num": group,
+                        "rank": rank
+                    };
+                    console.log(final);
+                    var settings = {
+                        "async": true,
+                        "crossDomain": true,
+                        "url": "http://localhost:8000/edit_category/",
+                        "method": "POST",
+                        "processData": false,
+                        "data": JSON.stringify(final)
+                    };
+
+                    $.ajax(settings).done(function (response) {
+                        console.log(response);
+                    });
+                }
+            }
+		});
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("paper-table");
+            switching = true;
+            //Set the sorting direction to ascending:
+            dir = "asc"; 
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 1; i < (rows.length - 2); i++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    console.log(x);
+                    console.log(y);
+                    /*check if the two rows should switch place,
+                    based on the direction, asc or desc:*/
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch= true;
+                        break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount ++;      
+                    } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        function sortColorTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("paper-table");
+            switching = true;
+            //Set the sorting direction to ascending:
+            dir = "asc"; 
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 1; i < (rows.length - 2); i++) {
+                //start by saying there should be no switching:
+                shouldSwitch = false;
+                /*Get the two elements you want to compare,
+                one from current row and one from the next:*/
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                x = x.getElementsByTagName("p")[2].innerHTML;
+                y = y.getElementsByTagName("p")[2].innerHTML;
+                x = parseInt('0x' + x,16);
+                y = parseInt('0x' + y,16);
+                /*check if the two rows should switch place,
+                based on the direction, asc or desc:*/
+                if (dir == "asc") {
+                    if (x > y) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch= true;
+                    break;
+                    }
+                } else if (dir == "desc") {
+                    if (x < y) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                    }
+                }
+                }
+                if (shouldSwitch) {
+                /*If a switch has been marked, make the switch
+                and mark that a switch has been done:*/
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                //Each time a switch is done, increase this count by 1:
+                switchcount ++;      
+                } else {
+                /*If no switching has been done AND the direction is "asc",
+                set the direction to "desc" and run the while loop again.*/
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+                }
+            }
         }
 
         function deleteThis(obj){
@@ -130,7 +305,7 @@
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/delete_category/",
+                "url": "http://localhost:8000/delete_category/",
                 "method": "POST",
                 "processData": false,
                 "data": JSON.stringify(v)
@@ -152,46 +327,77 @@
             var col_id = $(obj).closest('tr').find(".col_id")     // Gets a descendent with class="nr"
                        .text();
             var grp = $(obj).closest('tr').find(".grp")     // Gets a descendent with class="nr"
-                       .text();
-            $("#one").hide();
-            $("#two").show();
-    
+                       .text();  
+            console.log(grp);
+            var table = document.getElementById("paper-table");
+            var index;
+            for (var i = 1, row; row = table.rows[i]; i++) {
+                for (var j = 0, col; col = row.cells[j]; j++) {
+                    if(j == 1) {
+                        if(col.getElementsByTagName("P")[1].innerHTML == col_id) {
+                            index = i;
+                        }
+                    }
+                }  
+            }  
+        
+            $('#paper-table tr').eq(index).html('<td><input style="text-align: center" id="username3" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Name"></td><td><p id="idd" style="display:none"></p><input style="text-align: center" id="d" value="" placeholder="Select Colour"></td><td><input id="username5" style="text-align: center" value="" class="form-control input-group-lg" type="text" autocomplete="off" name="username" title="Enter username" placeholder="Enter Activity Group"></td><td><button onclick="finEdit(this)" type="button" class="btn btn-success">Edit Activity Type</button></td>');
+            document.getElementById('d').className += " jscolor {onFineChange:'update(this)'}";
+            document.getElementById('username5').value = grp;
             document.getElementById('username3').value = act;
             document.getElementById('d').value = col_code;
-            document.getElementById('id').value = col_id;
+            document.getElementById('idd').value = col_id;
             document.getElementById('d').style.backgroundColor = '#' + col_code;
-            document.getElementById('username5').value = grp;
+            new jscolor($('#d').last()[0]);
+        }
+
+        function update(jscolor) {
         }
 
         function finEdit(obj) {
             var fin_act = document.getElementById('username3').value;
             var fin_col = document.getElementById('d').value;
             var fin_grp = document.getElementById('username5').value;
-            var fin_id = document.getElementById('id').value;
-
-            var v = {
-                "id": fin_id,
-                "name": fin_act,
-                "bar_color": fin_col,
-                "group_num": fin_grp
-            }
+            var fin_id = document.getElementById('idd').value;
 
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://trackactivities.herokuapp.com/edit_category/",
-                "method": "POST",
-                "processData": false,
-                "data": JSON.stringify(v)
+                "url": "http://localhost:8000/get_category/",
+                "method": "GET"
             }
 
             $.ajax(settings).done(function (response) {
-                console.log(response);
-                $("#two").hide();
-                document.getElementById('tb').innerHTML = "";
-                view_records();
-                $("#one").show();
-            });
+                resp = response["categories_dict"];
+                for (i = 0, len = Object.keys(resp).length; i < len; i++) { 
+                    if(resp[i]["id"] == fin_id) {
+                        var v = {
+                            "id": fin_id,
+                            "name": fin_act,
+                            "bar_color": fin_col,
+                            "group_num": fin_grp,
+                            "rank": resp[i]["rank"]
+                        }
+
+                        rank = resp[i]["rank"]+1;
+                        console.log(rank);
+                        var settings = {
+                            "async": true,
+                            "crossDomain": true,
+                            "url": "http://localhost:8000/edit_category/",
+                            "method": "POST",
+                            "processData": false,
+                            "data": JSON.stringify(v)
+                        }
+
+                        $.ajax(settings).done(function (response) {
+                            $('#paper-table tr').eq(rank).html('<td class = "act">'+fin_act+'</td><td id = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_id" style="display:none">'+fin_id+'</p><p class = "col_code" style="display:none">'+fin_col+'</p></div></td><td class = "grp">'+fin_grp+'</td><td><a onclick="editThis(this)">Edit Activity Type</a></td><td><a class="delete-row" onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>');
+                            document.getElementById('tb').innerHTML = "";
+                            view_records();
+                        });
+                    }
+                }
+            });  
         }
 
         function addThis(obj){
@@ -202,38 +408,44 @@
             if (name == "" || colour == "" || group == "") {
                 alert("Enter all values!");
             } else {
-                /*var newdiv =  document.createElement('tr');
-                var c = '#' + colour;
-                newdiv.innerHTML = '<td class = "act">'+name+'</td><td class = "col"><div><p style="width:70px; height: 20px; margin: auto; background-color:c" id="x"></p><p class = "col_code" style="display:none">'+colour+'</p></div></td><td class = "grp">'+group+'</td><td><a href="#" onclick="editThis(this)">Edit Activity</a></td><td><a href="#" class="delete-row"  onclick="deleteThis(this)"><span class="glyphicon glyphicon-trash"></span></a></td>';
-                document.getElementById('tb').appendChild(newdiv);
-                var act = $(".col")
-                act = act[($(".col").length)-1];
-                var yy = act.getElementsByTagName("p");
-                yy[0].style.backgroundColor = c;*/
                 
                 document.getElementById("username").value = "";
                 document.getElementById("c").value = "";
                 document.getElementById("c").style.backgroundColor = "white";
                 document.getElementById("username2").value = "";
 
-                var v = {
-                    "name": name,
-                    "bar_color": colour,
-                    "group_num": group
-                };
                 var settings = {
                     "async": true,
                     "crossDomain": true,
-                    "url": "https://trackactivities.herokuapp.com/category/",
-                    "method": "POST",
-                    "processData": false,
-                    "data": JSON.stringify(v)
-                };
+                    "url": "http://localhost:8000/get_category/",
+                    "method": "GET"
+                }
 
                 $.ajax(settings).done(function (response) {
                     console.log(response);
-                    document.getElementById('tb').innerHTML = "";
-                    view_records();
+                    var resp = response["categories_dict"];
+
+                    var v = {
+                        "name": name,
+                        "bar_color": colour,
+                        "group_num": group,
+                        "rank": Object.keys(resp).length + 1
+                    };
+
+                    var settings = {
+                        "async": true,
+                        "crossDomain": true,
+                        "url": "http://localhost:8000/category/",
+                        "method": "POST",
+                        "processData": false,
+                        "data": JSON.stringify(v)
+                    };
+
+                    $.ajax(settings).done(function (response) {
+                        console.log(response);
+                        document.getElementById('tb').innerHTML = "";
+                        view_records();
+                    });
                 });
             }
         }
