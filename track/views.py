@@ -421,3 +421,9 @@ def delete_activity(request):
     activity = ActivityTracker.objects.get(pk=_id)
     activity.delete()
     return JsonResponse({"status":"True", "message":"Activity has been deleted."})
+
+
+
+
+
+
