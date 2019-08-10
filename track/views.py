@@ -1,5 +1,3 @@
-
-    
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template import RequestContext
@@ -39,7 +37,7 @@ def get_records(request, *args, **kwargs):
         week = custom_date - timedelta(days=7)
         custom_date_activities = ActivityTracker.objects.filter(date=custom_date)
         custom_date_elapsed = ActivityTracker.objects.filter(date=custom_date).values('category_name').annotate(Sum('elapsed_time'))
-        custom_date_categories = ActivityTracker.objects.filter(date=custom_date).values('category_name','category_bar_color','category_group_num').distinct()
+        custom_date_categories = ActivityTracker.objects.filter(date=custom_date).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
         custom_date_gnum_elapsed = ActivityTracker.objects.filter(date=custom_date).values('category_group_num').annotate(Sum('elapsed_time'))
         
         for i, custom_date_activity in enumerate(custom_date_activities):
@@ -74,7 +72,7 @@ def get_records(request, *args, **kwargs):
         end_week = start_week + timedelta(6)
         custom_week_activities = ActivityTracker.objects.filter(date__range=[start_week, end_week])
         custom_week_elapsed = ActivityTracker.objects.filter(date__range=[start_week, end_week]).values('category_name').annotate(Sum('elapsed_time'))
-        custom_week_categories = ActivityTracker.objects.filter(date__range=[start_week, end_week]).values('category_name','category_bar_color','category_group_num').distinct()
+        custom_week_categories = ActivityTracker.objects.filter(date__range=[start_week, end_week]).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
         custom_week_gnum_elapsed = ActivityTracker.objects.filter(date__range=[start_week, end_week]).values('category_group_num').annotate(Sum('elapsed_time'))
 
 
@@ -107,28 +105,28 @@ def get_records(request, *args, **kwargs):
             custom_week_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"] 
 
     daily_activities = ActivityTracker.objects.filter(date=today)
-    daily_categories = ActivityTracker.objects.filter(date=today).values('category_name','category_bar_color','category_group_num').distinct()
+    daily_categories = ActivityTracker.objects.filter(date=today).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
     daily_elapsed= ActivityTracker.objects.filter(date=today).values('category_name').annotate(Sum('elapsed_time'))
     daily_gnum_elapsed= ActivityTracker.objects.filter(date=today).values('category_group_num').annotate(Sum('elapsed_time'))
 
     weekly_activities = ActivityTracker.objects.filter(date__range=[datetime.date(week), custom_date])
-    weekly_categories = ActivityTracker.objects.filter(date__range=[datetime.date(week), custom_date]).values('category_name','category_bar_color','category_group_num').distinct()
+    weekly_categories = ActivityTracker.objects.filter(date__range=[datetime.date(week), custom_date]).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
     weekly_elapsed = ActivityTracker.objects.filter(date__range=[datetime.date(week), custom_date]).values('category_name').annotate(Sum('elapsed_time'))
     weekly_gnum_elapsed = ActivityTracker.objects.filter(date__range=[datetime.date(week), custom_date]).values('category_group_num').annotate(Sum('elapsed_time'))
 
     monthly_activities = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date])
     monthly_elapsed = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date]).values('category_name').annotate(Sum('elapsed_time'))
-    monthly_categories = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date]).values('category_name','category_bar_color','category_group_num').distinct()
+    monthly_categories = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date]).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
     monthly_gnum_elapsed = ActivityTracker.objects.filter(date__range=[datetime.date(month), custom_date]).values('category_group_num').annotate(Sum('elapsed_time'))
 
     monthnum_activities = ActivityTracker.objects.filter(date__month=int(m))
     monthnum_elapsed = ActivityTracker.objects.filter(date__month=int(m)).values('category_name').annotate(Sum('elapsed_time'))
-    monthnum_categories = ActivityTracker.objects.filter(date__month=int(m)).values('category_name','category_bar_color','category_group_num').distinct()
+    monthnum_categories = ActivityTracker.objects.filter(date__month=int(m)).values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
     monthnum_gnum_elapsed = ActivityTracker.objects.filter(date__month=int(m)).values('category_group_num').annotate(Sum('elapsed_time'))
 
     tilldate_activities = ActivityTracker.objects.all()
     tilldate_elapsed = ActivityTracker.objects.all().values('category_name').annotate(Sum('elapsed_time'))
-    tilldate_categories = ActivityTracker.objects.all().values('category_name','category_bar_color','category_group_num').distinct()
+    tilldate_categories = ActivityTracker.objects.all().values('category_name','category_bar_color','category_group_num').distinct().order_by('category_group_num')
     tilldate_gnum_elapsed = ActivityTracker.objects.all().values('category_group_num').annotate(Sum('elapsed_time'))
 
 # --------------------------Daily--------------------------------------
@@ -160,7 +158,7 @@ def get_records(request, *args, **kwargs):
     daily_activities_dict["groups"] = {}
     for elapsed_time in daily_gnum_elapsed:
         daily_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
-
+    
 # --------------------------Weekly--------------------------------------
      
     for i, weekly_activity in enumerate(weekly_activities):
@@ -276,12 +274,10 @@ def get_records(request, *args, **kwargs):
             "category_group_num":tilldate_category["category_group_num"],
             "total":tilldate_activities_dict["total"][tilldate_category["category_name"]]
         }
-    
     tilldate_activities_dict["groups"] = {}
     for elapsed_time in tilldate_gnum_elapsed:
         tilldate_activities_dict["groups"][elapsed_time["category_group_num"]] = elapsed_time["elapsed_time__sum"]
 
-    
     return JsonResponse({
         "custom_date":custom_date_activities_dict,
         "tillweek":custom_week_activities_dict,

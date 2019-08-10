@@ -18,7 +18,11 @@
         <style>
             a:hover { 
                 text-decoration: none; 
-            } 
+            };
+            .x {
+                background: #00a651;
+                color: #ffffff;
+            }
         </style>
     </head>
     <body>
@@ -253,12 +257,10 @@
                         var act = $(".col");
                         act = act[($(".col").length)-1];
                         console.log(act);
-                        /*var yy = act[0].getElementsByTagName("P");
-                        console.log(yy);*/
                         act.style.backgroundColor = c;
                     }
 
-                    $("body").on('click', '.dropdown-menu li a', function () {
+                    $("body").on('click', '.dropdown-menu li div', function () {
                         $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
                         $(this).parents(".dropdown").find('.btn');
                         $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
@@ -277,9 +279,7 @@
                         console.log(time_diff);
                         if (start == "Start time" || end == "End time" || $type == undefined) {
                             alert("Enter all values");
-                            document.getElementById('new').appendChild(newdiv);
-                            document.getElementById('start').value = "Start time";
-                            document.getElementById('end').value = "End time";
+                            //document.getElementById('new').appendChild(newdiv);
                             document.getElementById('dropdownMenu1').innerHTML = "Choose an activity" + '<span class="caret"></span>';
                         } else {
                             /*var newdiv = document.createElement('div');
