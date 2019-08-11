@@ -740,7 +740,9 @@
                 $.ajax(settings).done(function (response) {
                     var colors = {};
                     var resp = response["tilldate"];
+                    console.log(resp);
                     var resp1 = resp["category"];
+                    console.log(resp1);
                     var resp2 = resp["groups"];
                     var data = new google.visualization.DataTable();
                     data.addColumn('string', 'Activity');
@@ -752,7 +754,7 @@
                         colors[index] = resp1[index]["category_bar_color"];
                     };
 
-                    data.sort([{column: 1, desc: true}]);
+                    //data.sort([{column: 1, desc: true}]);
 
                     //build slices
                     var slices = [];
@@ -814,7 +816,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
 
                 //build slices
                 var slices = [];
@@ -874,7 +876,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
 
                 //build slices
                 var slices = [];
@@ -934,7 +936,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
 
                 document.getElementById('act').innerHTML = "";
                 for (var index in resp2) { 
@@ -995,7 +997,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
 
                 document.getElementById('act').innerHTML = "";
                 for (var index in resp2) { 
@@ -1055,7 +1057,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
                 
                 document.getElementById('act').innerHTML = "";
                 for (var index in resp2) { 
@@ -1116,7 +1118,7 @@
                     colors[index] = resp1[index]["category_bar_color"];
                 };
 
-                data.sort([{column: 1, desc: true}]);
+                //data.sort([{column: 1, desc: true}]);
 
                 document.getElementById('act').innerHTML = "";
                 for (var index in resp2) { 
